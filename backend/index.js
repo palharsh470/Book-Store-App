@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { createUser, login } from "./controllers/user.controller.js";
 import cors from "cors"
-import{ addBook, addBookToFavourite, deleteBook, getBooks, getFavouriteBooks, getLoggedUserBooks, updateBook } from "./controllers/book.controller.js";
+import{ addBook, addBookToFavourite, deleteBook, getBookById, getBooks, getFavouriteBooks, getLoggedUserBooks, removeBookFromFavourite, updateBook } from "./controllers/book.controller.js";
 import authorisation from "./middlewares/authmiddleware.js";
 
 dotenv.config();
@@ -21,8 +21,9 @@ server.post("/books/loggeduser",authorisation, getLoggedUserBooks)
 server.delete("/book/:id/delete",authorisation, deleteBook)
 server.patch("/book/:id/update",authorisation, updateBook)
 server.post("/book/favourite/:id/create",authorisation, addBookToFavourite)
-server.get("/book/favourite",authorisation, getFavouriteBooks)
-
+server.delete("/book/favourite/:id/delete",authorisation, removeBookFromFavourite)
+server.post("/book/favourite",authorisation, getFavouriteBooks)
+server.get("/book/:id" , getBookById)
 
 mongoose.connect(process.env.DB_URL).then(()=>{
     server.listen(3000, ()=>{

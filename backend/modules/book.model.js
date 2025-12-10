@@ -28,6 +28,12 @@ const bookSchema = new mongoose.Schema({
         type : String,
         required : true,
     },
+    img : {
+        type : String,
+    },
+    pdf : {
+        type : String,
+    },
     author :{
         type : mongoose.Schema.Types.ObjectId,
         ref : "bookStoreUser",

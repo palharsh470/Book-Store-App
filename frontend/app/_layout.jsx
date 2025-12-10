@@ -5,6 +5,7 @@ export default function StackLayout(){
         <Stack>
             <Stack.Screen name="(tabs)" options={{headerShown:false}}></Stack.Screen>
             <Stack.Screen name="login" options={{headerShown:false}}></Stack.Screen>
+
         </Stack>
     )
 }

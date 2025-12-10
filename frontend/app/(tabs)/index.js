@@ -4,6 +4,7 @@ import { Club, DotsThreeCircle, Flask, HandsPraying, Heart, MagnifyingGlass, Mon
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useFocusEffect } from "expo-router";
+import ip from "../../components/ip";
 export default function HomePage() {
     const [category, setcategory] = useState("friction")
     const [featured, setfeatured] = useState([])
@@ -11,13 +12,13 @@ export default function HomePage() {
     const [newdata, setnewdata] = useState([])
     const [evergreen, setevergreen] = useState([])
 
-
-
-
+    
     const getFeedBooks = async () => {
        
-        const featuredBooks = await fetch(`http://192.168.43.5:3000/books?category=${category}`, {
-            method: "POST",
+        try{
+
+            const featuredBooks = await fetch(`http://${ip}:3000/books?category=${category}`, {
+                method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
@@ -26,7 +27,7 @@ export default function HomePage() {
             })
 
         })
-        const trendingBooks = await fetch(`http://192.168.43.5:3000/books?category=${category}`, {
+        const trendingBooks = await fetch(`http://${ip}:3000/books?category=${category}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -36,7 +37,7 @@ export default function HomePage() {
             })
 
         })
-        const newBooks = await fetch(`http://192.168.43.5:3000/books?category=${category}`, {
+        const newBooks = await fetch(`http://${ip}:3000/books?category=${category}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -44,9 +45,9 @@ export default function HomePage() {
             body: JSON.stringify({
                 subcategory: "new"
             })
-
+            
         })
-        const evergreenBooks = await fetch(`http://192.168.43.5:3000/books?category=${category}`, {
+        const evergreenBooks = await fetch(`http://${ip}:3000/books?category=${category}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -64,6 +65,10 @@ export default function HomePage() {
         setnewdata(data3)
         setevergreen(data4)
         settrending(data2)
+    }
+    catch(err){
+        alert(err.message || "Something went wrong")
+    }
        
     }
     useFocusEffect(() => {
@@ -83,7 +88,7 @@ export default function HomePage() {
         <View style={{
             marginTop: 10,
             paddingBottom: 80,
-            backgroundColor: "lightgrey"
+          
         }}>
 
             <View style={{
@@ -124,7 +129,7 @@ export default function HomePage() {
                 </View>
             </View>
             <ScrollView style={{
-                backgroundColor: "lightgrey",
+                  backgroundColor : "#eef0d5",
                 height: "100%",
             }}>
                 <View>
@@ -160,7 +165,7 @@ export default function HomePage() {
                 }} horizontal={true} showsHorizontalScrollIndicator={false}>{
                         featured?.data?.map((value, index) => {
 
-                            return <Category  key={index} data={value}></Category>
+                            return <Category  fav={false} getFeedBooks={getFeedBooks} key={index} id={value?._id} data={value}></Category>
                         })
                     }
                 </ScrollView>
@@ -177,7 +182,7 @@ export default function HomePage() {
                         {
                             trending?.data?.map((value, index) => {
                               
-                                return <Category key={index}  data={value}></Category>
+                                return <Category fav={false} getFeedBooks={getFeedBooks}  key={index} id={value?._id}  data={value}></Category>
                             })
                         }
                     </ScrollView >
@@ -195,7 +200,7 @@ export default function HomePage() {
                         {
                             newdata?.data?.map((value, index) => {
 
-                                return <Category key={index}  data={value}></Category>
+                                return <Category fav={false} getFeedBooks={getFeedBooks}  key={index} id={value?._id}  data={value}></Category>
                             })
                         }
                     </ScrollView>
@@ -214,7 +219,7 @@ export default function HomePage() {
                         {
                             evergreen?.data?.map((value, index) => {
 
-                                return <Category key={index}  data={value}></Category>
+                                return <Category fav={false} getFeedBooks={getFeedBooks}  key={index} id={value?._id}  data={value}></Category>
                             })
                         }
                     </ScrollView>

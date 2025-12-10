@@ -1,10 +1,21 @@
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
+import { Button, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 import { StarIcon, Starhalf } from "phosphor-react-native"
 import StarRating from "../../components/starrating"
-import { useState } from "react"
+import { createContext, useState } from "react"
 import { Picker } from "@react-native-picker/picker"
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import CameraComponent from "../../components/CameraComponent"
+import ip from "../../components/ip"
+import { Image } from "react-native";
+import * as DocumentPicker from "expo-document-picker"
+
+import * as ImagePicker from "expo-image-picker"
+
 export default function AddBook() {
+
+    const [showCamera, setShowCamera] = useState(false);
+    const [photouri, setphotouri] = useState(null)
+
     const [israted, setisrated] = useState([])
 
     const [title, settitle] = useState("");
@@ -12,6 +23,9 @@ export default function AddBook() {
     const [subcategory, setsubcategory] = useState("");
     const [format, setformat] = useState("");
     const [language, setlanguage] = useState("");
+
+    const [bookUrl, setbookUrl] = useState("")
+    const [pdfUrl, setpdfUrl] = useState("")
 
     function handleTitleText(value) {
         settitle(value)
@@ -29,59 +43,186 @@ export default function AddBook() {
         setlanguage(value)
     }
 
-    
-    async function submitBook() {
-        if (!title.trim() || !category.trim() || !subcategory.trim() || !format.trim() || !language.trim()) {
-            alert("Fill all the fields Properly")
-            return
-        }
-
-        const token = await AsyncStorage.getItem("logedUser")
-        let rateCount =0;
-         israted.forEach((value)=>{
-            rateCount +=value
-        })
 
 
-        const response = await fetch("http://192.168.43.5:3000/book/create", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                "title": title.trim(),
-                "category": category.trim().toLowerCase(),
-                "subcategory": subcategory.trim().toLowerCase(),
-                "format": format.trim(),
-                "language": language.trim(),
-                "rating" : rateCount,
-                "token": token
+    const handleGalleryImage = async () => {
+        try {
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+
+            if (status != "granted") {
+                alert("Permission denied")
+                return;
+            }
+
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                quality: 0.7,
             })
 
-        })
+            if (result.canceled) {
+                return
+            }
 
-        settitle("")
-        setcategory("")
-        setformat("")
-        setlanguage("")
-        setsubcategory("")
+            const formdata = new FormData()
 
-        const data = await response.json()
-      
-        if(data){
-            alert(
-                `Book Added to DataBase
+            formdata.append("image", {
+                uri: result?.uri,
+                name: result?.name,
+                type: result?.mimeType
+            }
 
+            )
+
+
+            formdata.append("upload_preset", "mobile_unsigned")
+
+
+            const response = await fetch(
+                "https://api.cloudinary.com/v1_1/dnkfrbwde/raw/upload",
+                {
+                    method: "POST",
+                    body: formdata,
+                }
+            );
+
+            const imageUrldata = await response.json();
+
+            const cloudUrl = imageUrldata.secure_url
+
+            setbookUrl(cloudUrl)
+
+            setphotouri(result?.assets[0]?.uri)
+
+        }
+
+        catch (err) {
+            console.log("Photo Selection error:", err);
+        }
+
+    }
+
+
+    async function handlePdf() {
+
+        try {
+
+            const selectPdf = await DocumentPicker.getDocumentAsync({
+                "type": "application/pdf"
+            });
+
+            if (selectPdf.canceled) {
+                alert("Pdf upload cancelled")
+                return;
+            }
+
+            const data = selectPdf?.assets[0];
+
+
+            const formdata = new FormData()
+
+            formdata.append("file", {
+                uri: data?.uri,
+                name: data?.name,
+                type: data?.mimeType
+            }
+
+            )
+
+
+            formdata.append("upload_preset", "mobile_unsigned")
+
+
+            console.log(formdata)
+            const response = await fetch(
+                "https://api.cloudinary.com/v1_1/dnkfrbwde/raw/upload",
+                {
+                    method: "POST",
+                    body: formdata,
+                }
+            );
+
+            const uploadedPdf = await response.json();
+
+            const url = uploadedPdf?.secure_url;
+
+            setpdfUrl(url);
+
+        }
+        catch (err) {
+            console.log("Pdf Selection error:", err);
+        }
+
+
+    }
+    async function submitBook() {
+
+        try {
+
+
+            if (!title.trim() || !category.trim() || !subcategory.trim() || !format.trim() || !language.trim()) {
+                alert("Fill all the fields Properly")
+                return
+            }
+
+            const token = await AsyncStorage.getItem("logedUser")
+            let rateCount = 0;
+            israted.forEach((value) => {
+                rateCount += value
+            })
+
+
+            const response = await fetch(`http://${ip}:3000/book/create`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "title": title.trim(),
+                    "category": category.trim().toLowerCase(),
+                    "subcategory": subcategory.trim().toLowerCase(),
+                    "format": format.trim(),
+                    "language": language.trim(),
+                    "rating": rateCount,
+                    "img": bookUrl,
+                    "pdf": pdfUrl,
+                    "token": token
+                })
+
+            })
+
+            settitle("")
+            setcategory("")
+            setformat("")
+            setlanguage("")
+            setsubcategory("")
+            setphotouri("")
+
+            const data = await response.json()
+
+            if (data) {
+                alert(
+                    `Book Added to DataBase
+                
                 Title : ${data.data.title} 
                 Category : ${data.data.category}
                 Sub-category : ${data.data.subcategory}
                 Format :  ${data.data.format}
-                Language :${data.data.language}`
-            )
+                Language :${data.data.language}
+                img : ${data.data.img}
+                pdf : ${data.data.pdf}
+                `
+                )
+            }
+        }
+        catch (err) {
+            alert(err.message || "Something went wrong")
         }
     }
 
     return (
+
+
         <ScrollView style={{
 
         }}>
@@ -119,12 +260,34 @@ export default function AddBook() {
                     </TextInput>
                 </View>
 
-                <View style={{
-                    gap: 10
-                }}>
-                    <Text style={style.fieldText}>Image</Text>
-                    <Text>Image block</Text>
-                </View>
+                {showCamera ? (
+                    <View style={{ height: 600 }}>
+                        <CameraComponent setbookUrl={setbookUrl}
+                            onCapture={(uri) => {
+                                setphotouri(uri);
+                                setShowCamera(false);
+                            }}
+                            onCancel={() => setShowCamera(false)}
+                        />
+                    </View>
+                )
+                    :
+                    (
+                        <>
+                            <Button title="Take Photo" onPress={() => setShowCamera(true)} />
+                            <Button title="Choose from Gallery" onPress={() => {
+                                handleGalleryImage()
+                            }} />
+
+                            {photouri && (
+                                <Image
+                                    source={{ uri: photouri }}
+                                    style={{ width: 150, height: 150, marginTop: 10 }}
+                                />
+                            )}
+                        </>
+                    )}
+
                 <View style={{
                     gap: 10
                 }}>
@@ -147,16 +310,16 @@ export default function AddBook() {
                     gap: 10
                 }}>
                     <Text style={style.fieldText}>Category</Text>
-                    
+
                     <Picker
-                    selectedValue={category}
-                    onValueChange={(value) => {
-                        handleCategoryText(value)
-                    }} 
-                    prompt="Select a Category"
-                    
-                    > 
-                      <Picker.Item label="Select a category" value=""></Picker.Item>
+                        selectedValue={category}
+                        onValueChange={(value) => {
+                            handleCategoryText(value)
+                        }}
+                        prompt="Select a Category"
+
+                    >
+                        <Picker.Item label="Select a category" value=""></Picker.Item>
                         <Picker.Item label="Friction" value="friction"></Picker.Item>
                         <Picker.Item label="Science" value="science"></Picker.Item>
                         <Picker.Item label="Politics" value="politics"></Picker.Item>
@@ -172,14 +335,14 @@ export default function AddBook() {
                 }}>
                     <Text style={style.fieldText}>Sub-Category</Text>
 
-                     <Picker
-                    selectedValue={subcategory}
-                    onValueChange={(value) => {
-                        handleSubcateText(value)
-                    }} 
-                    prompt="Select a subcategory"
-                    
-                    > 
+                    <Picker
+                        selectedValue={subcategory}
+                        onValueChange={(value) => {
+                            handleSubcateText(value)
+                        }}
+                        prompt="Select a subcategory"
+
+                    >
                         <Picker.Item label="Select a subcategory" value=""></Picker.Item>
                         <Picker.Item label="Featured" value="featured"></Picker.Item>
                         <Picker.Item label="Trending" value="trending"></Picker.Item>
@@ -193,14 +356,14 @@ export default function AddBook() {
                     <Text style={style.fieldText}>Format</Text>
 
                     <Picker
-                    selectedValue={format}
-                    onValueChange={(value) => {
-                        handleFormatText(value)
-                    }}
-                    prompt="Select a Format"
-                    
-                    > 
-                      <Picker.Item label="Select a Format" value=""></Picker.Item>
+                        selectedValue={format}
+                        onValueChange={(value) => {
+                            handleFormatText(value)
+                        }}
+                        prompt="Select a Format"
+
+                    >
+                        <Picker.Item label="Select a Format" value=""></Picker.Item>
                         <Picker.Item label="Ebook" value="ebook"></Picker.Item>
                         <Picker.Item label="Audio" value="audio"></Picker.Item>
                         <Picker.Item label="Others" value="other"></Picker.Item>
@@ -218,6 +381,9 @@ export default function AddBook() {
                         borderRadius: 15
                     }}></TextInput>
                 </View>
+
+                <Button title="upload pdf" onPress={handlePdf}></Button>
+
             </View>
 
 

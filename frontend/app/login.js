@@ -3,6 +3,8 @@ import { Image, ImageBackground, KeyboardAvoidingView, ScrollView, Text, TextInp
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 
+import ip from "../components/ip";
+
 export default function Login() {
 
     const [isLogin, setisLogin] = useState(false)
@@ -25,7 +27,7 @@ export default function Login() {
                 return
             }
 
-            const response = await fetch("http://192.168.43.5s:3000/login", {
+            const response = await fetch(`http:/${ip}:3000/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -69,7 +71,7 @@ export default function Login() {
                 return
             }
 
-            const response = await fetch("http://192.168.43.5s:3000/user", {
+            const response = await fetch(`http:/${ip}:3000/user`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

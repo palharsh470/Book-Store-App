@@ -5,6 +5,8 @@ import YourBook from "../../components/yourBook";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { useFocusEffect } from "expo-router";
+import ip from "../../components/ip";
+
 
 export default function Profile() {
     const [userBooks , setuserBooks]= useState([])
@@ -13,7 +15,7 @@ export default function Profile() {
     async function getLoggedUserBooks() {
           const token = await AsyncStorage.getItem("logedUser")
         
-          const response = await fetch("http://192.168.43.5:3000/books/loggeduser", {
+          const response = await fetch(`http://${ip}:3000/books/loggeduser`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

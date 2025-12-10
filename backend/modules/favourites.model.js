@@ -9,7 +9,7 @@ const favouriteSchema = mongoose.Schema({
     book : {
         type : mongoose.Schema.Types.ObjectId,
         ref : "Books",
-        required : true
+        required : true,
     }
 })
 
