@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Image, ImageBackground, KeyboardAvoidingView, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
-
 import ip from "../components/ip";
-
 export default function Login() {
+
+
+   
 
     const [isLogin, setisLogin] = useState(false)
     const [loginUserName, setloginUserName] = useState("");
@@ -16,11 +17,15 @@ export default function Login() {
     const [err, seterr] = useState("")
 
 
+
+
     async function handleLogin() {
 
         try {
 
-            if(!loginUserName?.trim() || !loginPassword?.trim()){
+            console.log("Login")
+
+            if (!loginUserName?.trim() || !loginPassword?.trim()) {
                 alert("Invalid credentials");
                 setloginPassword("")
                 setloginUserName("")
@@ -35,6 +40,7 @@ export default function Login() {
                 body: JSON.stringify({ "username": loginUserName, "password": loginPassword })
 
             })
+            console.log(response)
             const loginData = await response.json();
             if (loginData.success == false) {
                 seterr(loginData.message)
@@ -63,7 +69,7 @@ export default function Login() {
 
         try {
 
-            if(!signupPassword?.trim() || !signupUserName?.trim() || !email?.trim()){
+            if (!signupPassword?.trim() || !signupUserName?.trim() || !email?.trim()) {
                 alert("Invalid credentials");
                 setSignupPassword("")
                 setSigupUserName("")
@@ -90,13 +96,13 @@ export default function Login() {
             const token = signupData.token;
             await AsyncStorage.setItem("logedUser", token);
 
-             router.replace("/(tabs)")
+            router.replace("/(tabs)")
             alert("User created successfully")
 
             setSignupPassword("")
             setemail("")
             setSigupUserName("")
-            
+
         }
         catch (err) {
             seterr(err.message)
@@ -109,8 +115,10 @@ export default function Login() {
     function signup() {
         setisLogin(false)
     }
+
+
     return (
-       
+
 
         <View style={{
             height: "100%",
@@ -311,7 +319,7 @@ export default function Login() {
 
                                 }}>Enter username</Text>
 
-                                <TextInput onChangeText={(value)=>{
+                                <TextInput onChangeText={(value) => {
                                     setSigupUserName(value)
                                 }} value={signupUserName} placeholder="Your Username">
 
@@ -334,7 +342,7 @@ export default function Login() {
                                 }}>Enter Email</Text>
                                 <TextInput style={{
 
-                                }} onChangeText={(value)=>{
+                                }} onChangeText={(value) => {
                                     setemail(value)
                                 }} value={email} placeholder="Your Email">
 
@@ -356,7 +364,7 @@ export default function Login() {
                                 }}>Enter Password</Text>
                                 <TextInput style={{
 
-                                }} onChangeText={(value)=>{
+                                }} onChangeText={(value) => {
                                     setSignupPassword(value)
                                 }} value={signupPassword} placeholder="Your Password">
 
@@ -429,13 +437,15 @@ export default function Login() {
 
                 </View>
 
-                <TouchableOpacity style={{
+                {/* <TouchableOpacity style={{
                     width: "80%",
                     alignItems: "center",
                     margin: 20,
                     flexDirection: "row",
                     gap: 5,
                     marginLeft: 80
+                }} onPress={() => {
+                   
                 }}>
                     <Image style={{
                         resizeMode: "cover",
@@ -447,9 +457,9 @@ export default function Login() {
                         fontSize: 20,
                         fontWeight: "bold",
                         opacity: 0.75,
-                        color : "white"
+                        color: "white"
                     }}>Continue with Google</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
             </ImageBackground>
         </View>
     )

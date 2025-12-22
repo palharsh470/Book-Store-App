@@ -1,7 +1,8 @@
 {
   "expo": {
     "name": "firstApp",
-    "slug": "firstApp",
+    "slug": "pathshala",
+    "owner": "harsh470",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -12,7 +13,8 @@
       "supportsTablet": true
     },
     "android": {
-        "activityState": "resumed",
+       "package": "com.harsh470.pathshala",
+   
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -39,11 +41,18 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "0836ee23-6e77-4c6b-86a5-d4d29a5b35c8"
+      }
     }
   }
 }

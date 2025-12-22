@@ -5,8 +5,8 @@ export default async function authorisation(req, res, next) {
     try {
 
         const token = req.body.token
-
-        const tokenData = jwt.verify(token, process.env.jwt_secret)
+console.log(process.env.jwt_secret)
+        const tokenData = jwt.verify(token,process.env.jwt_secret)
 
         const tokenId = tokenData.id;
         const loggedUser = await user.findById(tokenId);

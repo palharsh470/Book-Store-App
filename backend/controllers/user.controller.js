@@ -85,3 +85,38 @@ export const login = async (req, res) => {
         })
     }
 }
+
+export const getLoggedAuthor = async (req, res) => {
+    try {
+        const loggedUser = req.user
+
+        if (!loggedUser) {
+            return res.json({
+                success: false,
+                message: "User not Logged in"
+            })
+        }
+
+        const id = loggedUser._id;
+
+        const userData = await user.findById(id)
+        if (!userData) {
+            return res.json({
+                success: false,
+                message: "User not Exist"
+            })
+        }
+
+        res.json({
+            success: true,
+            data: userData
+        })
+    }
+    catch (err) {
+        res.json({
+            success: false,
+            message: err.message
+        })
+    }
+}
+

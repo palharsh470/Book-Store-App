@@ -72,13 +72,17 @@ export async function getBookById(req, res) {
 }
 export async function getBooks(req, res) {
     try {
-        const query = req.query.category
-        const filter = req.body.subcategory
 
-        const booksRecord = await Book.find({
-            category: query,
-            subcategory: filter
-        }).populate("author", "username")
+        const query ={}
+        if(req.query.category){
+            query.category = req.query.category
+        }
+        if(req.query.subcategory){
+            query.subcategory = req.query.subcategory
+        }
+        
+
+        const booksRecord = await Book.find(query).populate("author", "username")
 
         res.json({
             success: true,

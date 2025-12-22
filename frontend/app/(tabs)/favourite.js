@@ -57,7 +57,7 @@ export default function Favourite() {
             }}
             numColumns={2}
             style={{
-                backgroundColor: "#eef0d5",
+                       backgroundColor: "#ECEBDE"
 
             }}></FlatList>
     )

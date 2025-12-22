@@ -1,5 +1,5 @@
-import { Button, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
-import { StarIcon, Starhalf } from "phosphor-react-native"
+import { ActivityIndicator, Button, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
+import { FilePdfIcon, StarIcon, Starhalf, UploadSimpleIcon, X } from "phosphor-react-native"
 import StarRating from "../../components/starrating"
 import { createContext, useState } from "react"
 import { Picker } from "@react-native-picker/picker"
@@ -8,16 +8,17 @@ import CameraComponent from "../../components/CameraComponent"
 import ip from "../../components/ip"
 import { Image } from "react-native";
 import * as DocumentPicker from "expo-document-picker"
-
+import { LinearGradient } from "expo-linear-gradient"
 import * as ImagePicker from "expo-image-picker"
 
 export default function AddBook() {
 
     const [showCamera, setShowCamera] = useState(false);
     const [photouri, setphotouri] = useState(null)
-
+    const [loadingPhoto, setloadingPhoto] = useState(false)
+    const [loadingPdf, setloadingPdf] = useState(false)
     const [israted, setisrated] = useState([])
-
+    const [pdfuri, setpdfuri] = useState("")
     const [title, settitle] = useState("");
     const [category, setcategory] = useState("");
     const [subcategory, setsubcategory] = useState("");
@@ -54,6 +55,7 @@ export default function AddBook() {
                 return;
             }
 
+            setloadingPhoto(true)
             const result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ImagePicker.MediaTypeOptions.Images,
                 allowsEditing: true,
@@ -61,15 +63,18 @@ export default function AddBook() {
             })
 
             if (result.canceled) {
+                setloadingPhoto(false)
                 return
             }
+
+
 
             const formdata = new FormData()
 
             formdata.append("image", {
-                uri: result?.uri,
-                name: result?.name,
-                type: result?.mimeType
+                uri: result?.assets[0]?.uri,
+                name: result?.assets[0]?.name,
+                type: result?.assets[0]?.mimeType
             }
 
             )
@@ -86,6 +91,8 @@ export default function AddBook() {
                 }
             );
 
+
+            console.log(response)
             const imageUrldata = await response.json();
 
             const cloudUrl = imageUrldata.secure_url
@@ -94,10 +101,13 @@ export default function AddBook() {
 
             setphotouri(result?.assets[0]?.uri)
 
+            setloadingPhoto(false)
+
         }
 
         catch (err) {
             console.log("Photo Selection error:", err);
+            setloadingPhoto(false)
         }
 
     }
@@ -106,13 +116,14 @@ export default function AddBook() {
     async function handlePdf() {
 
         try {
-
+            setloadingPdf(true)
             const selectPdf = await DocumentPicker.getDocumentAsync({
                 "type": "application/pdf"
             });
 
             if (selectPdf.canceled) {
                 alert("Pdf upload cancelled")
+                setloadingPdf(false)
                 return;
             }
 
@@ -132,8 +143,7 @@ export default function AddBook() {
 
             formdata.append("upload_preset", "mobile_unsigned")
 
-
-            console.log(formdata)
+            setpdfuri(data?.uri)
             const response = await fetch(
                 "https://api.cloudinary.com/v1_1/dnkfrbwde/raw/upload",
                 {
@@ -147,15 +157,19 @@ export default function AddBook() {
             const url = uploadedPdf?.secure_url;
 
             setpdfUrl(url);
+            setloadingPdf(false)
 
         }
         catch (err) {
             console.log("Pdf Selection error:", err);
+            setloadingPdf(false)
         }
 
 
     }
     async function submitBook() {
+
+        console.log("Book submit")
 
         try {
 
@@ -166,10 +180,14 @@ export default function AddBook() {
             }
 
             const token = await AsyncStorage.getItem("logedUser")
+
+            console.log(token)
             let rateCount = 0;
             israted.forEach((value) => {
                 rateCount += value
             })
+
+
 
 
             const response = await fetch(`http://${ip}:3000/book/create`, {
@@ -200,6 +218,7 @@ export default function AddBook() {
 
             const data = await response.json()
 
+            console.log(data)
             if (data) {
                 alert(
                     `Book Added to DataBase
@@ -216,6 +235,7 @@ export default function AddBook() {
             }
         }
         catch (err) {
+            console.log("catch")
             alert(err.message || "Something went wrong")
         }
     }
@@ -223,8 +243,9 @@ export default function AddBook() {
     return (
 
 
-        <ScrollView style={{
 
+        <ScrollView style={{
+            backgroundColor: "#ECEBDE"
         }}>
 
             <View style={{
@@ -235,7 +256,8 @@ export default function AddBook() {
                 <Text style={{
                     fontSize: 32,
                     fontWeight: "bold",
-                    marginTop: 20
+                    marginTop: 20,
+                    color: "#55502cff"
                 }}>
                     ADD BOOK
                 </Text>
@@ -248,20 +270,23 @@ export default function AddBook() {
                 <View style={{
                     gap: 10
                 }}>
-                    <Text style={style.fieldText}>Title</Text>
+                    <Text style={style.fieldText}>Book Title</Text>
                     <TextInput onChangeText={(value) => {
                         handleTitleText(value)
-                    }} value={title} placeholder="Add your title" style={{
-                        borderWidth: 5,
-                        borderColor: "lightgrey",
-                        borderRadius: 15
+                    }} value={title} placeholder="Book Title" style={{
+                        borderWidth: 2,
+                        paddingHorizontal: 10,
+                        borderColor: "#847c56ff",
+                        borderRadius: 10
                     }}>
 
                     </TextInput>
                 </View>
 
                 {showCamera ? (
-                    <View style={{ height: 600 }}>
+                    <View style={{
+                        height: '600'
+                    }}>
                         <CameraComponent setbookUrl={setbookUrl}
                             onCapture={(uri) => {
                                 setphotouri(uri);
@@ -273,19 +298,48 @@ export default function AddBook() {
                 )
                     :
                     (
-                        <>
-                            <Button title="Take Photo" onPress={() => setShowCamera(true)} />
-                            <Button title="Choose from Gallery" onPress={() => {
+                        <View style={{
+                            gap: 15,
+                            borderRadius: 10,
+                            borderWidth: 2,
+                            borderStyle: "dashed",
+                            padding: 10,
+
+                            borderColor: "#847c56ff"
+                        }}>
+                            <View style={{
+                                gap: 5,
+                                margin: 10
+                            }}>
+                                <UploadSimpleIcon style={{ margin: "auto" }} size={42} color="#847c56ff" />
+                                <Text style={{
+                                    color: "#847c56ff",
+                                    fontWeight: "bold"
+                                    , fontSize: 20,
+                                    margin: "auto"
+                                }}>
+                                    Upload Image
+                                </Text>
+                            </View>
+                            <Button color={"#a9a384ff"} title={photouri ? "Change Photo" : "Take Photo"} onPress={() => setShowCamera(true)} />
+                            {loadingPhoto ? <ActivityIndicator size={"large"}></ActivityIndicator> : <Button color={"#a9a384ff"} title={photouri ? "Change from Gallery" : "Choose from Gallery"} onPress={() => {
                                 handleGalleryImage()
-                            }} />
+                            }} />}
 
                             {photouri && (
-                                <Image
-                                    source={{ uri: photouri }}
-                                    style={{ width: 150, height: 150, marginTop: 10 }}
-                                />
+                                <>
+                                    <Image
+                                        source={{ uri: photouri }}
+                                        style={{ width: 150, height: 150, marginTop: 10 }}
+                                    />
+                                    <TouchableOpacity onPress={()=>{
+                                        setphotouri("")
+                                    }} style={{ backgroundColor : "red", bottom : 138,left : 138, position : "absolute"}}><X size={22} />
+
+                                    </TouchableOpacity>
+                                </>
                             )}
-                        </>
+                        </View>
                     )}
 
                 <View style={{
@@ -311,63 +365,87 @@ export default function AddBook() {
                 }}>
                     <Text style={style.fieldText}>Category</Text>
 
-                    <Picker
-                        selectedValue={category}
-                        onValueChange={(value) => {
-                            handleCategoryText(value)
-                        }}
-                        prompt="Select a Category"
+                    <View style={{
+                        borderWidth: 2,
+                        borderColor: "#847c56ff",
+                        borderRadius: 10,
 
-                    >
-                        <Picker.Item label="Select a category" value=""></Picker.Item>
-                        <Picker.Item label="Friction" value="friction"></Picker.Item>
-                        <Picker.Item label="Science" value="science"></Picker.Item>
-                        <Picker.Item label="Politics" value="politics"></Picker.Item>
-                        <Picker.Item label="Economy" value="economy"></Picker.Item>
-                        <Picker.Item label="Biopic" value="biopic"></Picker.Item>
-                        <Picker.Item label="Social" value="social"></Picker.Item>
-                        <Picker.Item label="Religion" value="religion"></Picker.Item>
-                        <Picker.Item label="Others" value="others"></Picker.Item>
-                    </Picker>
+                    }}>
+                        <Picker
+                            selectedValue={category}
+                            onValueChange={(value) => {
+                                handleCategoryText(value)
+                            }}
+                            prompt="Select a Category"
+
+                        >
+                            <Picker.Item label="Select a category" value=""></Picker.Item>
+                            <Picker.Item label="Friction" value="friction"></Picker.Item>
+                            <Picker.Item label="Science" value="science"></Picker.Item>
+                            <Picker.Item label="Politics" value="politics"></Picker.Item>
+                            <Picker.Item label="Economy" value="economy"></Picker.Item>
+                            <Picker.Item label="Biopic" value="biopic"></Picker.Item>
+                            <Picker.Item label="Social" value="social"></Picker.Item>
+                            <Picker.Item label="Religion" value="religion"></Picker.Item>
+                            <Picker.Item label="Others" value="others"></Picker.Item>
+                        </Picker>
+                    </View>
+
                 </View>
                 <View style={{
                     gap: 10
                 }}>
                     <Text style={style.fieldText}>Sub-Category</Text>
 
-                    <Picker
-                        selectedValue={subcategory}
-                        onValueChange={(value) => {
-                            handleSubcateText(value)
-                        }}
-                        prompt="Select a subcategory"
+                    <View style={{
+                        borderWidth: 2,
+                        borderColor: "#847c56ff",
+                        borderRadius: 10,
 
-                    >
-                        <Picker.Item label="Select a subcategory" value=""></Picker.Item>
-                        <Picker.Item label="Featured" value="featured"></Picker.Item>
-                        <Picker.Item label="Trending" value="trending"></Picker.Item>
-                        <Picker.Item label="New" value="new"></Picker.Item>
-                        <Picker.Item label="Evergreen" value="evergreen"></Picker.Item>
-                    </Picker>
+                    }}>
+                        <Picker
+                            selectedValue={subcategory}
+                            onValueChange={(value) => {
+                                handleSubcateText(value)
+                            }}
+
+                            prompt="Select a subcategory"
+
+                        >
+                            <Picker.Item label="Select a subcategory" value=""></Picker.Item>
+                            <Picker.Item label="Featured" value="featured"></Picker.Item>
+                            <Picker.Item label="Trending" value="trending"></Picker.Item>
+                            <Picker.Item label="New" value="new"></Picker.Item>
+                            <Picker.Item label="Evergreen" value="evergreen"></Picker.Item>
+                        </Picker>
+                    </View>
                 </View>
                 <View style={{
                     gap: 10
                 }}>
                     <Text style={style.fieldText}>Format</Text>
 
-                    <Picker
-                        selectedValue={format}
-                        onValueChange={(value) => {
-                            handleFormatText(value)
-                        }}
-                        prompt="Select a Format"
+                    <View style={{
+                        borderWidth: 2,
+                        borderColor: "#847c56ff",
+                        borderRadius: 10,
 
-                    >
-                        <Picker.Item label="Select a Format" value=""></Picker.Item>
-                        <Picker.Item label="Ebook" value="ebook"></Picker.Item>
-                        <Picker.Item label="Audio" value="audio"></Picker.Item>
-                        <Picker.Item label="Others" value="other"></Picker.Item>
-                    </Picker>
+                    }}>
+                        <Picker
+                            selectedValue={format}
+                            onValueChange={(value) => {
+                                handleFormatText(value)
+                            }}
+
+                            prompt="Select a Format"
+
+                        >
+                            <Picker.Item label="Select a Format" value=""></Picker.Item>
+                            <Picker.Item label="Ebook" value="ebook"></Picker.Item>
+                            <Picker.Item label="Audio" value="audio"></Picker.Item>
+                            <Picker.Item label="Others" value="other"></Picker.Item>
+                        </Picker>
+                    </View>
                 </View>
                 <View style={{
                     gap: 10
@@ -376,13 +454,37 @@ export default function AddBook() {
                     <TextInput onChangeText={(value) => {
                         handleLanguageText(value)
                     }} value={language} placeholder="Book Language" style={{
-                        borderWidth: 5,
-                        borderColor: "lightgrey",
-                        borderRadius: 15
+                        borderWidth: 2,
+                        paddingHorizontal: 10,
+                        borderColor: "#847c56ff",
+                        borderRadius: 10
                     }}></TextInput>
                 </View>
 
-                <Button title="upload pdf" onPress={handlePdf}></Button>
+                {loadingPdf ? <ActivityIndicator size={"large"} /> : <View style={{
+                    gap: 15,
+                    borderRadius: 10,
+                    borderWidth: 2,
+                    borderStyle: "dashed",
+                    padding: 10,
+
+                    borderColor: "#847c56ff"
+                }}>
+                    <FilePdfIcon style={{ margin: "auto" }} size={42} />
+                    <Button color={"#a9a384ff"} title={pdfuri ? "Change Pdf" : "Upload Pdf"} onPress={handlePdf}></Button>
+                    {
+                        pdfuri && <View style={
+                            {
+                                flexDirection: "row",
+                                marginHorizontal: 7
+                            }
+                        }>
+                            <FilePdfIcon size={32} />
+                            <Text>{pdfuri}</Text>
+                        </View>
+                    }
+                </View>}
+
 
             </View>
 
@@ -393,16 +495,18 @@ export default function AddBook() {
                 marginBottom: 30
             }}>
                 <TouchableOpacity style={{
-                    backgroundColor: "lightgrey",
+                    backgroundColor: "#55502cff",
                     padding: 10,
+                    paddingHorizontal: 25,
                     borderRadius: 10
                 }}
                     onPress={submitBook}>
-                    <Text style={style.fieldText}>Add Book</Text>
+                    <Text style={{ ...style.fieldText, color: "#f4f3efff" }}>Add Book</Text>
                 </TouchableOpacity>
             </View>
 
         </ScrollView>
+
     )
 }
 

@@ -4,8 +4,18 @@ import { BookOpenText, FilePlus, Heart, User } from "phosphor-react-native";
 import { ActivityIndicatorBase } from "react-native";
 export default function Layout(){
     return (
-        <Tabs options={{
-        }} >
+        <Tabs screenOptions={{
+         tabBarStyle : {
+            backgroundColor : "#D7D3BF"
+         },
+
+         tabBarActiveBackgroundColor : "#A59D84",
+         tabBarActiveTintColor : "black",
+         
+        }}  
+        
+        >
+         
             
             <Tabs.Screen name="index" 
             options={{headerShown:false, title:"Home", tabBarIcon : ()=>{

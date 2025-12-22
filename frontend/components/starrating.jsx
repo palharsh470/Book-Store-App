@@ -12,7 +12,7 @@ export default function StarRating({count, setisrated, israted}) {
     return (
         <TouchableOpacity onPress={handleRating}>
  
-            <StarIcon size={32} color="#ffe014" weight={israted[count] ? "fill" : "bold"} />
+            <StarIcon size={32} color="#6a6338ff" weight={israted[count] ? "fill" : "bold"} />
         </TouchableOpacity>
     )
 }

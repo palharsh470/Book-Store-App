@@ -5,6 +5,7 @@ import { useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Picker } from "@react-native-picker/picker";
 import ip from "./ip";
+import { router } from "expo-router";
 export default function YourBook({ getLoggedUserBooks, data }) {
 
     const [title, settitle] = useState(data.item.title)
@@ -96,12 +97,15 @@ export default function YourBook({ getLoggedUserBooks, data }) {
         <View style={{
             margin: 10,
             flex: 1,
-            height: "250",
-            width: "140",
             backgroundColor: "lightgrey",
             borderRadius: 10,
             paddingTop: 10
+            , shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.2,
+            shadowRadius: 6,
 
+            elevation: 10,
 
         }}>
             <TouchableOpacity style={{
@@ -109,7 +113,13 @@ export default function YourBook({ getLoggedUserBooks, data }) {
                 width: 80,
                 alignSelf: "center"
 
-            }}>
+            }} onPress={() => {
+                router.push({
+                    pathname: "details",
+                    params: { id: data?.item?._id }
+                })
+            }
+            }>
                 <Image style={{
                     height: 130,
                     width: 80,
@@ -124,44 +134,26 @@ export default function YourBook({ getLoggedUserBooks, data }) {
                 <Text style={{
                     fontSize: 17,
                     fontWeight: "bold",
-                    textAlign: "left"
-                }}>{data.item.title}</Text>
+                    textAlign: "left",
+
+                }} numberOfLines={1}>{data.item.title}</Text>
 
 
-                <View style={{
-                    top: 8
-                }}>
-                    <View style={{
-                        flexDirection: "row",
-                        gap: 3,
-                        alignItems: "center"
-                    }}>
-                        <StarHalf size={22} color="#ffe014" weight="fill" />
-                        <Text style={{
 
-                            fontWeight: "500"
-
-                            , opacity: 0.3
-                        }}>Ratings : {data.item.rating} </Text>
-                    </View>
-                    <Text style={{
-                        fontWeight: "600"
-                        , opacity: 0.7
-                    }}>Format : {data.item.format} </Text>
-
-                </View>
             </View>
 
             <View style={{
                 flexDirection: "row",
                 justifyContent: "center",
                 marginTop: 10,
-                flex: 1
+                flex: 1,
+
 
             }}>
                 <TouchableOpacity style={{
                     backgroundColor: "skyblue",
                     flex: 1,
+                    padding: 5,
                     borderBottomLeftRadius: 10,
                     paddingHorizontal: 6
                 }} onPress={handleVisible}>
@@ -174,7 +166,7 @@ export default function YourBook({ getLoggedUserBooks, data }) {
                 <TouchableOpacity style={{
                     backgroundColor: "red",
                     flex: 1,
-                   
+                    padding: 5,
                     paddingHorizontal: 6,
                     borderBottomRightRadius: 10
                 }} onPress={() => {
@@ -182,8 +174,8 @@ export default function YourBook({ getLoggedUserBooks, data }) {
                 }}>
                     <Text style={{
                         fontSize: 19,
-                        
-                        textAlign : "center",
+
+                        textAlign: "center",
                         fontWeight: "600"
                     }}>Delete</Text>
                 </TouchableOpacity>

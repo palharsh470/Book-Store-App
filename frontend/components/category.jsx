@@ -76,10 +76,17 @@ export function Category({ fav, getFeedBooks, getfavBooks, id, data }) {
         <View style={{
             margin: 10,
             flex: 1,
-            padding: 10,
-
+            padding: 20,
+            justifyContent: "center",
+            alignItems: "center",
             backgroundColor: "white",
-            borderRadius: 10
+            borderRadius: 10,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.2,
+            shadowRadius: 6,
+
+            elevation: 10,
 
         }}>
             <TouchableOpacity style={{
@@ -89,7 +96,7 @@ export function Category({ fav, getFeedBooks, getfavBooks, id, data }) {
             }} onPress={() => {
                 router.push({
                     pathname: "details",
-                    params: {id : data?._id }
+                    params: { id: data?._id }
                 })
             }
             }>
@@ -100,52 +107,7 @@ export function Category({ fav, getFeedBooks, getfavBooks, id, data }) {
                 }} source={{ uri: data?.img }}></Image>
 
             </TouchableOpacity>
-            {data && <View style={{
-                margin: 5
 
-            }}>
-
-                <Text style={{
-                    fontSize: 17,
-                    fontWeight: "bold",
-                    textAlign: "left"
-                }}>{data?.title}</Text>
-                <Text style={{
-                    fontSize: 14,
-                    fontWeight: "bold",
-                    textAlign: "left"
-                    , opacity: 0.5
-                }}>By {data?.author?.username}</Text>
-
-                <View style={{
-                    top: 8
-                }}>
-                    <View style={{
-                        flexDirection: "row",
-                        gap: 3,
-                        alignItems: "center"
-                    }}>
-                        <StarHalf size={22} color="#ffe014" weight="fill" />
-                        <Text style={{
-
-                            fontWeight: "500"
-
-                            , opacity: 0.3
-                        }}>Ratings : {data?.rating} </Text>
-                    </View>
-                    <Text style={{
-                        fontWeight: "600"
-                        , opacity: 0.7
-                    }}>Format : {data?.format} </Text>
-                    <Text style={{
-                        fontWeight: "600"
-                        , opacity: 0.7
-                    }}>Language : {data?.language}</Text>
-
-                </View>
-
-
-            </View>}
 
             <TouchableOpacity onPress={() => {
                 isfav ? deletefromfav() : addtofav()
@@ -170,9 +132,14 @@ export function SubCategory({ category, setcategory, logo, text }) {
         <TouchableOpacity onPress={handlePress} style={{
             margin: 10,
             alignItems: "center",
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.2,
+            shadowRadius: 6,
 
+            elevation: 10,
             borderRadius: 20,
-            backgroundColor: category === text ? "white" : "#eef0d5",
+            backgroundColor: category === text ? "white" : "#c9bfa4ff",
 
             padding: 10,
         }}>
